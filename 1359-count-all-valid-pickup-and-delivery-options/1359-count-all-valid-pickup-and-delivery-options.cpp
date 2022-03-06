@@ -1,25 +1,17 @@
 class Solution {
 public:
     int countOrders(int n) {
-    int mod=1e9+7;
-    long long ans=1;
-    int a=1;
-    int b=n;
-    while(b){
-        ans*=b;
-        ans%=mod;
-        b--;
-        
-    }
-    cout<<a<<endl;;
-    for(int i=1;i<=2*n;i=i+2){
-        ans*=(2*n-i);
-        ans%=mod;
-        // cout<<ans<<" ";
-    }
-    return ans;
-        
+        long ans = 1;
+        int MOD = 1e9 + 7;
 
+        for (int i = 1; i <= n; ++i) {
+            // Ways to arrange all pickups, 1*2*3*4*5*...*n
+            ans = ans * i;
+            // Ways to arrange all deliveries, 1*3*5*...*(2n-1)
+            ans = ans * (2 * i - 1);
+            ans %= MOD;
+        }
         
+        return ans;
     }
 };
