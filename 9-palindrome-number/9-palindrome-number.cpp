@@ -10,9 +10,9 @@ public:
                 reverse= reverse*10+a;
                 x=x/10;
             } 
+            
             if(temp==reverse)
                 return true;
-    
         }
            return false;
         
