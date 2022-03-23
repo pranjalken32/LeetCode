@@ -12,7 +12,7 @@ public:
             } 
             if(temp==reverse)
                 return true;
-                return false;
+    
         }
            return false;
         
