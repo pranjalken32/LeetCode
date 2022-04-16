@@ -6,7 +6,7 @@ public:
         {
             if(s[i]=='L')
                 c++;
-            else if(s[i]=='R')
+            else
                 c--;
             if(c==0)
                 ans++;
