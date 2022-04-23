@@ -4,24 +4,23 @@ public:
         const int inf=1e7+10;
     int networkDelayTime(vector<vector<int>>& times, int n, int k) {
         
-        vector<pair<int,int>>graph[N];
-        for(auto vec : times)
+        vector<vector<pair<int,int>>>graph(N+1);
+        for(auto &vec : times)
         {
             graph[vec[0]].push_back({vec[1],vec[2]}); // (node,weight) format
         }
         
         vector<int>visited(N,0);
         vector<int> dist(N,inf);
-       priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>>pq;
-        pq.push({0,k});
-
+        set<pair<int,int>>pq ;   //(weight,node) format
+            pq.insert({0,k});
             dist[k]=0;
         while(pq.size()>0)
         {
-            auto node = pq.top();
+            auto node = *pq.begin();
                 int weight= node.first;
             int v=node.second;
-            pq.pop();
+            pq.erase(pq.begin());
             if(visited[v])
                 continue;
             visited[v]=1;
@@ -33,7 +32,7 @@ public:
                 if(weight+weight_child < dist[v_child])
                 {
                     dist[v_child]=weight+weight_child;
-                    pq.push({dist[v_child],v_child});
+                    pq.insert({dist[v_child],v_child});
             }
                 
             }
