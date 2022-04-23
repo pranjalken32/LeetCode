@@ -12,15 +12,16 @@ public:
         
         vector<int>visited(N,0);
         vector<int> dist(N,inf);
-        set<pair<int,int>>pq ;   //(weight,node) format
-            pq.insert({0,k});
+       priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>>pq;
+        pq.push({0,k});
+
             dist[k]=0;
         while(pq.size()>0)
         {
-            auto node = *pq.begin();
+            auto node = pq.top();
                 int weight= node.first;
             int v=node.second;
-            pq.erase(pq.begin());
+            pq.pop();
             if(visited[v])
                 continue;
             visited[v]=1;
@@ -32,7 +33,7 @@ public:
                 if(weight+weight_child < dist[v_child])
                 {
                     dist[v_child]=weight+weight_child;
-                    pq.insert({dist[v_child],v_child});
+                    pq.push({dist[v_child],v_child});
             }
                 
             }
