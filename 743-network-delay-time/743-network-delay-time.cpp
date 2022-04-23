@@ -4,7 +4,7 @@ public:
         const int inf=1e7+10;
     int networkDelayTime(vector<vector<int>>& times, int n, int k) {
         
-        vector<vector<pair<int,int>>>graph(N+1);
+        unordered_map<int,vector<pair<int,int>>>graph(N+1);
         for(auto &vec : times)
         {
             graph[vec[0]].push_back({vec[1],vec[2]}); // (node,weight) format
