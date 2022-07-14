@@ -21,8 +21,9 @@ public:
             else
             {
                 
-                j++;
+                
                 nums3.push_back(nums1[i]);
+                i++;
             }
         }
             
