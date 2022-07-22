@@ -1,64 +1,98 @@
+class cluster
+{
+    public:
+        set<pair<int,int>> c; // set of cells that are contaminated
+        set<pair<int,int>> uc; // set of cells that are next to this cluster and are uncontaminated
+        int wcnt = 0;       // walls required to contain this structure 
+    
+};
 class Solution {
 public:
-    int containVirus(vector<vector<int>>& grid) {
-        int ans = 0;
-        while (true) {
-            int walls = model(grid);
-            if (walls == 0) break;
-            ans += walls;
+    
+    void dfs(vector<vector<int>> &grid, int i, int j, vector<vector<bool>> &vis, cluster &cl)
+    {
+        if(i == grid.size() || i < 0 || j < 0 || j == grid[0].size()||vis[i][j]||grid[i][j] == -1)
+        {
+            // if the current src is out of grid bounds or if the cell is already visited  or current cell is already walled that is -1
+            return;
         }
-        return ans;
+        if(grid[i][j] == 0)
+        {
+            // if cell is uncontaminated then add to the uncontaminatd cells (uc) and increment wall cnt 
+            cl.wcnt++;
+            cl.uc.insert({i,j});
+            return;
+        }
+        // if current cell is contaminated add to contaminated and mark vis = true
+        cl.c.insert({i,j});
+        vis[i][j] = true;
+        // call dfs in all directions
+        dfs(grid,i+1,j,vis,cl); // above
+        dfs(grid,i-1,j,vis,cl); // below
+        dfs(grid,i,j+1,vis,cl); // right
+        dfs(grid,i,j-1,vis,cl); // left
+        
     }
-private:
-    int model(vector<vector<int>>& grid) {
-        int m = grid.size(), n = grid[0].size(), N = 100;
-        vector<unordered_set<int>> virus, toInfect;
-        vector<vector<int>> visited(m, vector<int>(n, 0));
-        vector<int> walls;
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (grid[i][j] == 1 && visited[i][j] == 0) {
-                    virus.push_back(unordered_set<int>());
-                    toInfect.push_back(unordered_set<int>());
-                    walls.push_back(0);
-                    dfs(grid, visited, virus.back(), toInfect.back(), walls.back(), i, j);
+
+    int containVirus(vector<vector<int>>& grid) {
+    
+        // row ka size
+        int n = grid.size();
+        // col ka size
+        int m = grid[0].size();
+        int ans = 0;
+        while(1)
+        {
+            // visisted matrix
+            vector<vector<bool>> vis(n,vector<bool>(m));
+            // comparator for pq to sort it according to size of uncontaminated cells in cluster
+            auto comp=[](const cluster& A,const cluster& B)
+            { 
+                return A.uc.size()<B.uc.size();
+            };
+            // initialise priority queue
+            priority_queue<cluster,vector<cluster>, decltype(comp)> pq(comp);
+            // search for a contaminated cell in the grid
+            for(int i = 0; i<n; i++)
+            {
+                for(int j = 0; j<m; j++)
+                {
+                    if(!vis[i][j]&&grid[i][j] == 1)
+                    {
+                        // create a cluster
+                        cluster c;
+                        // call dfs
+                        dfs(grid,i,j,vis,c);
+                        pq.push(c);
+
+                    }
                 }
             }
-        }
-        int maxArea = 0, idx = -1;
-        for (int i = 0; i < toInfect.size(); i++) {
-            if (toInfect[i].size() > maxArea) {
-                maxArea = toInfect[i].size();
-                idx = i;
+            // if size of priority queue is 0 the termination condition is reached ie all contaminated cells are contained.
+            if(pq.size()==0)
+            break;
+            // get the biggest cluster is found make em all -1 and add the walls reqd to contain them 
+            cluster k = pq.top();
+            pq.pop();
+            for(auto x: k.c)
+            {
+                grid[x.first][x.second] = -1;
             }
-        }
-        if (idx == -1) return 0;
-        for (int i = 0; i < toInfect.size(); i++) {
-            if (i != idx) {
-                for (int key : toInfect[i]) 
-                    grid[key/N][key%N] = 1;
+            ans += k.wcnt;
+
+            // for the rest of the clusters make their uncontaminated cells as contaminated
+            while(!pq.empty())
+            {
+                cluster k1 = pq.top();
+                pq.pop();
+                for(auto x: k1.uc)
+                {
+                    grid[x.first][x.second] = 1;
+                }   
             }
-            else {
-                for (int key: virus[i]) 
-                    grid[key/N][key%N] = -1;
-            }
+         
         }
-        return walls[idx];
-    }
-private:
-    void dfs(vector<vector<int>>& grid, vector<vector<int>>& visited, unordered_set<int>& virus, unordered_set<int>& toInfect, int& wall, int row, int col) {
-        int m = grid.size(), n = grid[0].size(), N = 100;
-        if (row < 0 || row >= m || col < 0 || col >= n || visited[row][col] == 1) return;
-        if (grid[row][col] == 1) {
-            visited[row][col] = 1;
-            virus.insert(row*N + col);
-            vector<int> dir = {0, -1, 0, 1, 0};
-            for (int i = 0; i < 4; i++)
-                dfs(grid, visited, virus, toInfect, wall, row+dir[i], col+dir[i+1]);
-        }
-        else if (grid[row][col] == 0) {
-            wall++;
-            toInfect.insert(row*N + col);
-        }
+        
+        return ans;
     }
 };
