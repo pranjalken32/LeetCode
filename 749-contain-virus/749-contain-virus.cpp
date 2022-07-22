@@ -1,119 +1,64 @@
-class Group{
-    public:
-    
-    set<pair<int,int>>ne;
-    set<pair<int,int>>affected;
-    
-    int w;
-    
-    Group(){
-        w = 0;
-    }
-};
-
-
-
 class Solution {
 public:
-    
-    bool isValid(int i,int j,int n,int m){
-        return i>=0 && j>=0 && i<n && j<m;
-    }
-    
-    int dir[4][2]={
-        {1,0},
-        {0,1},
-        {-1,0},
-        {0,-1}
-    };
-    
-
-    void dfs(vector<vector<int>>&in,int i,int j,int n,int m,vector<vector<bool>>&vis,Group *g){
-        
-        if(in[i][j]==-1) return;
-        
-        if(in[i][j] ==0 ){
-            g->w++;
-            g->ne.insert({i,j});
-            return;
+    int containVirus(vector<vector<int>>& grid) {
+        int ans = 0;
+        while (true) {
+            int walls = model(grid);
+            if (walls == 0) break;
+            ans += walls;
         }
-        
-        vis[i][j] = 1;
-        
-        if(in[i][j] == 1)
-            g->affected.insert({i,j});
-           
-        
-        for(int k=0;k<4;k++){
-            
-            int x = i+dir[k][0], y = j+dir[k][1];
-            
-            if(isValid(x,y,n,m) && !vis[x][y]) 
-                dfs(in,i+dir[k][0],j+dir[k][1],n,m,vis,g);
-        }
-        
-    }
-    
-    
-    int containVirus(vector<vector<int>>& in) {
-        
-        int n = in.size(),m = in[0].size(),ans = 0;
-        
-        
-        while(1){
-            
-            vector<Group *>v;
-            
-            vector<vector<bool>>visited(n,vector<bool>(m,0));
-            
-            for(int i=0;i<n;i++){
-                for(int j=0;j<m;j++){
-                    if(!visited[i][j] && in[i][j]==1){
-                        
-                        Group *g  = new Group();
-                        dfs(in,i,j,n,m,visited,g);
-                        
-                        v.push_back(g);
-                    }
-                        
-                }
-            }
-            
-            
-            if(v.size()==0) break;
-            
-            
-            int mx = 0,index = 0;
-            
-            for(int i=0;i<v.size();i++){
-                if(v[i]->ne.size()>mx){
-                    mx = v[i]->ne.size();
-                    index = i;
-                }
-            }
-            
-            Group * x = v[index];
-            
-            ans+=(x->w);
-            
-            
-            for(auto itr:x->affected){
-                in[itr.first][itr.second] = -1;
-            }
-            
-            
-            for(int i=0;i<v.size();i++){
-                if(i==index) continue;
-                x = v[i];
-                for(auto itr:x->ne){
-                    in[itr.first][itr.second] = 1;
-                }
-                
-            }
-            
- 
-        }
-        
         return ans;
+    }
+private:
+    int model(vector<vector<int>>& grid) {
+        int m = grid.size(), n = grid[0].size(), N = 100;
+        vector<unordered_set<int>> virus, toInfect;
+        vector<vector<int>> visited(m, vector<int>(n, 0));
+        vector<int> walls;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1 && visited[i][j] == 0) {
+                    virus.push_back(unordered_set<int>());
+                    toInfect.push_back(unordered_set<int>());
+                    walls.push_back(0);
+                    dfs(grid, visited, virus.back(), toInfect.back(), walls.back(), i, j);
+                }
+            }
+        }
+        int maxArea = 0, idx = -1;
+        for (int i = 0; i < toInfect.size(); i++) {
+            if (toInfect[i].size() > maxArea) {
+                maxArea = toInfect[i].size();
+                idx = i;
+            }
+        }
+        if (idx == -1) return 0;
+        for (int i = 0; i < toInfect.size(); i++) {
+            if (i != idx) {
+                for (int key : toInfect[i]) 
+                    grid[key/N][key%N] = 1;
+            }
+            else {
+                for (int key: virus[i]) 
+                    grid[key/N][key%N] = -1;
+            }
+        }
+        return walls[idx];
+    }
+private:
+    void dfs(vector<vector<int>>& grid, vector<vector<int>>& visited, unordered_set<int>& virus, unordered_set<int>& toInfect, int& wall, int row, int col) {
+        int m = grid.size(), n = grid[0].size(), N = 100;
+        if (row < 0 || row >= m || col < 0 || col >= n || visited[row][col] == 1) return;
+        if (grid[row][col] == 1) {
+            visited[row][col] = 1;
+            virus.insert(row*N + col);
+            vector<int> dir = {0, -1, 0, 1, 0};
+            for (int i = 0; i < 4; i++)
+                dfs(grid, visited, virus, toInfect, wall, row+dir[i], col+dir[i+1]);
+        }
+        else if (grid[row][col] == 0) {
+            wall++;
+            toInfect.insert(row*N + col);
+        }
     }
 };
