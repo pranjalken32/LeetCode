@@ -1,13 +1,9 @@
 class Solution {
 public:
     int strStr(string haystack, string needle) {
-        int l=needle.length();
-        int flag=0;
-        int m=haystack.length();
-        
-        for(int i=0;i<m;i++)
+        for(int i=0;i<haystack.length();i++)
         {
-            if(haystack.substr(i,l)==needle)
+            if(haystack.substr(i,needle.length())==needle)
                 return i;
         }
         return -1;
