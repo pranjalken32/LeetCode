@@ -1,7 +1,7 @@
 class Solution {
 public:
     bool checkIfPangram(string sentence) {
-        set<char>s;
+        unordered_set<char>s;
         int l=sentence.length();
         for(int i=0;i<l;i++)
         {
